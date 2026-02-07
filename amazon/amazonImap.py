@@ -83,6 +83,24 @@ class AmazonEmailManager:
 
         code = soup.find("td", class_="data").get_text(strip=True)
 
+        """Older version that work
+        patterns = [
+            r'class="data">(\d{6})<',
+            r">(\d{6})</td>",
+            r":(\d{6})",
+            r"(\d{6})",
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, body)
+            if match:
+                code = match.group(1)
+                if len(code) == 6 and code.isdigit():
+                    return code
+
+        return None
+        """
+
         return code
 
     def get_email_body(self, msg: Any) -> str:
