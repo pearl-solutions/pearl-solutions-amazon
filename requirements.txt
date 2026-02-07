@@ -1,8 +1,9 @@
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=5.0.0
-pytz>=2024.1
-selenium>=4.20.0
-pyyaml>=6.0.1
+requests
+beautifulsoup4
+lxml
+pytz
+selenium
+pyyaml
 camoufox[geoip]
 faker
+browserforge
