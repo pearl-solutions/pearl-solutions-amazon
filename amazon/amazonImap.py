@@ -4,6 +4,7 @@ import re
 import time
 from email.header import decode_header
 from typing import Any, Optional
+from bs4 import BeautifulSoup
 
 
 class AmazonEmailManager:
@@ -77,21 +78,12 @@ class AmazonEmailManager:
         Returns:
             The 6-digit OTP if found, otherwise None.
         """
-        patterns = [
-            r'class="data">(\d{6})<',
-            r">(\d{6})</td>",
-            r":(\d{6})",
-            r"(\d{6})",
-        ]
 
-        for pattern in patterns:
-            match = re.search(pattern, body)
-            if match:
-                code = match.group(1)
-                if len(code) == 6 and code.isdigit():
-                    return code
+        soup = BeautifulSoup(body, "html.parser")
 
-        return None
+        code = soup.find("td", class_="data").get_text(strip=True)
+
+        return code
 
     def get_email_body(self, msg: Any) -> str:
         """Extract the message body from an email message object.
