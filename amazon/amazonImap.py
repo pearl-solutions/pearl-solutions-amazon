@@ -39,7 +39,7 @@ class AmazonEmailManager:
         """
         self.imap_server = imap_server
         self.email_address = email_address
-        self.password = password
+        self.password = password.replace(" ", "")
         self.port = port
 
         self.mail = imaplib.IMAP4_SSL(self.imap_server, self.port)
@@ -196,7 +196,7 @@ class AmazonEmailManager:
 
         while True:
             if time.time() - start_time > timeout:
-                print(f"\n{prefix}Timeout ({timeout}s) - {target_email}")
+                print(f"{prefix}Timeout ({timeout}s) - {target_email}")
                 return None
 
             try:
