@@ -42,6 +42,7 @@ def config_manager() -> None:
         imap_cfg = config.get("imap") or {}
         print(" Imap email: ", imap_cfg.get("email", "Not set"))
         print(" Imap server: ", imap_cfg.get("server", "Not set"))
+        print(" Imap password: ", _safe_tail(imap_cfg.get("password", "Not set"), 4))
 
         # Avoid printing full webhook URL (sensitive value) to the terminal/logs.
         print(" Discord webhook: ", _safe_tail(config.get("webhook")))

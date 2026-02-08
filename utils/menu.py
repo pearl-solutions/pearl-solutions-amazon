@@ -23,9 +23,9 @@ def print_menu() -> None:
     )
 
     print("")
-    print(" (1) Generate account")
-    print(" (2) Open account browser")
-    print(" (3) Enter raffle")
+    print(" (1) Generate Amazon account")
+    print(" (2) Open account session")
+    print(" (3) Enter account into raffle")
     print(" (4) Check for invitations")
     print(" (5) Settings")
     print(" (6) Exit")
