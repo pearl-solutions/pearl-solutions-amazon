@@ -44,7 +44,8 @@ def send_private_webhook_entries(
         "avatar_url": "https://i.ibb.co/fdYpNgWC/Pearl-Solutions-Tavola-disegno-1-03.png",
         "embeds": [
             {
-                "title": "Successfully entered the raffle",
+                "title": ":tada: Successfully entered the raffle",
+                "url": f"https://www.amazon.fr/dp/{product_asin}?pearl=solutions",
                 "color": 0xFFFFFF,
                 "description": f"- {_truncate(product_name, 40)}",
                 "fields": [
