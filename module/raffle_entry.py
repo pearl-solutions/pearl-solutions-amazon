@@ -45,8 +45,9 @@ def entry_raffle_manager():
 
     while True:
         accounts = amazonAccount.load_all_accounts()
-        print("Select an account to enter raffles:")
-        print("")
+
+        print("Select an account to enter raffles:\n")
+
         for i, account in enumerate(accounts, 1):
             print(f" ({i}) {account.email}")
         print(f" ({len(accounts) + 1}) Return")
@@ -99,8 +100,6 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
     session = account.get_session_with_cookies()
     proxies = amazonAccount.proxy_string_to_dict(account.get_proxy())
 
-    start = time.time()
-
     try:
         print(f"({account.email}) · Getting session...")
 
@@ -131,6 +130,7 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
     for asin in asins:
         print(f"({account.email}) · Getting raffle details...")
 
+        # Make sure to get the right offer/listing by amazon
         response = session.get(
             f"https://www.amazon.fr/dp/{asin}?m=A1X6FK5RDHNB96",
             headers=DEFAULT_HEADERS,
