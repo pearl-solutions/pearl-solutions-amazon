@@ -2,6 +2,7 @@ import email
 import imaplib
 import re
 import time
+from datetime import timezone, datetime, timedelta
 from email.header import decode_header
 from typing import Any, Optional
 from bs4 import BeautifulSoup
@@ -143,6 +144,10 @@ class AmazonEmailManager:
 
         return body
 
+    def _imap_date(self, dt: datetime) -> str:
+        """Format a datetime to IMAP date: DD-Mon-YYYY (e.g. 09-Feb-2026)."""
+        return dt.strftime("%d-%b-%Y")
+
     def check_for_otp(self, mail: imaplib.IMAP4_SSL, target_email: str) -> Optional[str]:
         """Check the inbox for the latest unread OTP email addressed to a target.
 
@@ -156,8 +161,14 @@ class AmazonEmailManager:
         try:
             mail.select("INBOX")
 
+            # Coarse server-side filter (day granularity): only emails since yesterday (for max_age_days <= 1).
+            now_utc = datetime.now(timezone.utc)
+            cutoff_utc = now_utc - timedelta(days=1)
+            since_dt = cutoff_utc.date()
+            since_str = self._imap_date(datetime(since_dt.year, since_dt.month, since_dt.day))
+
             # Search for unread emails whose "To" matches the target email.
-            status, messages = mail.search("UTF-8", f'(TO "{target_email}" UNSEEN)'.encode("utf-8"))
+            status, messages = mail.search("UTF-8", f'(TO "{target_email}" UNSEEN SINCE "{since_str}")'.encode("utf-8"),)
             if status != "OK":
                 return None
 
