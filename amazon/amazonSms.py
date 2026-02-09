@@ -88,6 +88,8 @@ class AmazonSmsManagerPool:
 
         start_time = time.time()
 
+        print(f"[{activation_id}] Waiting for SMS...")
+
         while True:
             try:
                 response = requests.post(

