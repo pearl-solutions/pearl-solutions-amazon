@@ -279,6 +279,7 @@ def generate_account(
 
             try:
                 continuer_button = page.locator('button.a-button-text:has-text("Continuer les achats")')
+                time.sleep(random.random() * 2)
                 page.wait_for_load_state("networkidle")
                 if continuer_button.is_visible(timeout=5000):
                     continuer_button.click()
