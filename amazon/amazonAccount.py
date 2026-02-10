@@ -409,7 +409,7 @@ def generate_account(
 
             time.sleep(random.random())
 
-            page.wait_for_load_state('networkidle')
+            page.wait_for_load_state('networkidle', timeout=60000)
             time.sleep(random.random())
 
             test = input("Press enter to continue...")
