@@ -290,6 +290,7 @@ def generate_account(
             time.sleep(random.random())
 
             page.hover("#nav-link-accountList")
+            time.sleep(random.random()+ 0.5)
             page.click("text=Commencer ici.")
             page.wait_for_load_state("networkidle")
 
