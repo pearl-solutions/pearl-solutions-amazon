@@ -324,7 +324,7 @@ def generate_account(
             page.type("#ap_password", password, delay=120)
             time.sleep(random.random())
             page.type("#ap_password_check", password, delay=120)
-            time.sleep(random.random())
+            time.sleep(random.random() + 0.5)
 
             page.wait_for_selector("#continue", state="visible")
             page.click("#continue")
