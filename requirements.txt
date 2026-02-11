@@ -8,3 +8,4 @@ camoufox[geoip]
 camoufox
 faker
 browserforge
+wordfreq

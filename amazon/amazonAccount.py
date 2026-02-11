@@ -299,7 +299,7 @@ def generate_account(
             createTrigger = True
 
             if not page.query_selector("#ap_customer_name"):
-                page.type("#ap_email_login", email, delay=80)
+                page.type("#ap_email_login", email, delay=120)
 
                 time.sleep(random.random())
 
@@ -316,14 +316,14 @@ def generate_account(
             page.wait_for_selector("#ap_customer_name", state="visible")
             time.sleep(random.random())
 
-            page.type("#ap_customer_name", generate_name(), delay=80)
+            page.type("#ap_customer_name", generate_name(), delay=120)
             time.sleep(random.random())
             if createTrigger:
-                page.type("#ap_email", email, delay=80)
+                page.type("#ap_email", email, delay=120)
                 time.sleep(random.random())
-            page.type("#ap_password", password, delay=80)
+            page.type("#ap_password", password, delay=120)
             time.sleep(random.random())
-            page.type("#ap_password_check", password, delay=80)
+            page.type("#ap_password_check", password, delay=120)
             time.sleep(random.random())
 
             page.wait_for_selector("#continue", state="visible")
@@ -346,7 +346,7 @@ def generate_account(
                 thread_id=email,
             )
 
-            page.type("#cvf-input-code", otp_code, delay=80)
+            page.type("#cvf-input-code", otp_code, delay=120)
             time.sleep(random.random())
             page.wait_for_selector("#cvf-submit-otp-button")
             page.click("#cvf-submit-otp-button")
@@ -354,6 +354,8 @@ def generate_account(
                 page.wait_for_load_state('networkidle', timeout=60000)
 
                 page.locator("span.a-dropdown-prompt").click()
+
+                time.sleep(random.random())
 
                 menu = page.locator("ul[role='listbox'], .a-popover-inner")
 
@@ -370,7 +372,7 @@ def generate_account(
                 if not number:
                     break
 
-                page.type("#cvfPhoneNumber", number, delay=80)
+                page.type("#cvfPhoneNumber", number, delay=120)
                 time.sleep(random.random())
 
                 page.wait_for_selector("#a-autoid-0")
@@ -401,7 +403,7 @@ def generate_account(
                 ...
 
             try:
-                page.type("#cvf-input-code", code, delay=80)
+                page.type("#cvf-input-code", code, delay=120)
                 time.sleep(random.random())
                 page.wait_for_selector("#cvf-submit-otp-button")
                 page.click("#cvf-submit-otp-button")

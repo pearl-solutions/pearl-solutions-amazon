@@ -5,7 +5,7 @@ from typing import Optional
 
 import requests
 
-from discord import *
+from wordfreq import top_n_list
 from amazon.amazonAccount import generate_account, load_all_accounts
 from amazon.amazonImap import AmazonEmailManager
 from amazon.amazonSms import AmazonSmsManagerPool
@@ -217,6 +217,16 @@ def worker(
             # Always mark as done to avoid blocking the queue in case of errors.
             email_queue.task_done()
 
+def add_random_tag_to_email(email: str, word_list: list[str]) -> str:
+    if "@" not in email:
+        raise ValueError("Email invalide")
+
+    local_part, domain = email.split("@", 1)
+
+    word = random.choice(word_list).lower()
+    digits = f"{random.randint(0, 99):02d}"
+
+    return f"{local_part}+{word}{digits}@{domain}"
 
 def main(
     emails: list[str],
@@ -239,6 +249,13 @@ def main(
         sms_manager: Shared SMS manager instance.
     """
     semaphore = threading.BoundedSemaphore(max_threads)
+
+    FRENCH_WORDS = [
+        w for w in top_n_list("fr", n=5000)
+        if w.isalpha() and 4 <= len(w) <= 10
+    ]
+
+    emails = [add_random_tag_to_email(email, FRENCH_WORDS) for email in emails]
 
     # Randomize to distribute domains/proxies and reduce repeated patterns.
     random.shuffle(emails)
