@@ -1,5 +1,6 @@
 import random
 import time
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from bs4 import BeautifulSoup
@@ -17,57 +18,120 @@ USER_AGENT = (
 )
 DEFAULT_HEADERS = {"User-Agent": USER_AGENT}
 
+ASIN_RE = re.compile(r"^[A-Z0-9]{10}$")
+
+
+def _prompt_yes_no(prompt: str) -> str:
+    """Prompt until the user enters a valid y/n answer.
+
+    Returns:
+        "y" or "n"
+    """
+    while True:
+        raw = input(prompt).strip().lower()
+        if raw in ("y", "n"):
+            return raw
+        print("Invalid input. Please enter 'y' or 'n'.")
+
+
+def _prompt_int(prompt: str, *, min_value: int = 1, max_value: int | None = None) -> int:
+    """Prompt until the user enters a valid integer within bounds."""
+    while True:
+        raw = input(prompt).strip()
+        try:
+            value = int(raw)
+        except ValueError:
+            print("Invalid input. Please enter a whole number.")
+            continue
+
+        if value < min_value:
+            print(f"Invalid input. Please enter a number >= {min_value}.")
+            continue
+
+        if max_value is not None and value > max_value:
+            print(f"Invalid input. Please enter a number <= {max_value}.")
+            continue
+
+        return value
+
+
+def _normalize_asin(value: str) -> str:
+    """Normalize an ASIN input (trim + uppercase)."""
+    return (value or "").strip().upper()
+
+
+def _is_valid_asin(value: str) -> bool:
+    """Return True if value looks like a valid ASIN (10 alphanumeric characters)."""
+    return bool(ASIN_RE.fullmatch(_normalize_asin(value)))
+
+
+def _prompt_asin(prompt: str) -> str:
+    """Prompt until the user enters a valid ASIN."""
+    while True:
+        asin = _normalize_asin(input(prompt))
+        if _is_valid_asin(asin):
+            return asin
+        print("Invalid ASIN. Expected 10 alphanumeric characters (e.g. B0ABCDEF12).")
+
 
 def entry_raffle_manager():
     config = load_config()
-    asins: list[str] = config["amazon_asins"]
+    asins: list[str] = [a for a in (_normalize_asin(x) for x in config.get("amazon_asins", [])) if a]
 
     print_title()
     print("")
 
     if len(asins) == 0:
-        print("No asins loaded")
+        print("No ASINs loaded in config.json (key: amazon_asins).")
         time.sleep(3)
         return
 
-    choice = input("Whould you like to enter raffles for all asins? (y/n) ").lower()
+    # Clamp thread count later to account count; here we only validate input type/range.
+    thread = _prompt_int("How many threads do you want to use? ", min_value=1)
+
+    choice = _prompt_yes_no("Would you like to enter raffles for all ASINs? (y/n) ")
     if choice == "n":
-        selected_asin = input("Enter the ASIN you want to enter raffles for: ").strip()
+        selected_asin = _prompt_asin("Enter the ASIN you want to enter raffles for: ")
+
         # Keep the original behavior: allow entering an ASIN even if it's not in config.
+        if selected_asin not in asins:
+            print("Note: this ASIN is not in config.json. Proceeding anyway.")
         asins = [selected_asin]
 
-    choice = input("Whould you like to enter raffles for all accounts? (y/n) ").lower()
+    choice = _prompt_yes_no("Would you like to enter raffles for all accounts? (y/n) ")
     if choice == "y":
         print("")
         accounts = amazonAccount.load_all_accounts()
-        enter_raffles(asins, accounts)
+        if not accounts:
+            print("No accounts found. Please generate/import accounts first.")
+            time.sleep(3)
+            return
+        enter_raffles(asins, accounts, thread)
         return
 
     while True:
         accounts = amazonAccount.load_all_accounts()
+        if not accounts:
+            print("No accounts found. Please generate/import accounts first.")
+            time.sleep(3)
+            return
 
         print("Select an account to enter raffles:\n")
 
         for i, account in enumerate(accounts, 1):
-            print(f" ({i}) {account.email}")
+            email_display = (account.email or "").strip() or "unknown-email"
+            print(f" ({i}) {email_display}")
         print(f" ({len(accounts) + 1}) Return")
 
-        try:
-            choice_int = int(input("\nPlease enter your choice : "))
-        except ValueError:
-            print("Invalid choice. Please try again.")
-            continue
+        choice_int = _prompt_int("\nPlease enter your choice: ", min_value=1, max_value=len(accounts) + 1)
 
         if choice_int == len(accounts) + 1:
             break
 
-        if 1 <= choice_int <= len(accounts):
-            selected_account = accounts[choice_int - 1]
-            print("")
-            enter_raffles(asins, [selected_account])
-            break
-
-        print("Invalid choice. Please try again.")
+        selected_account = accounts[choice_int - 1]
+        print("")
+        enter_raffles(asins, [selected_account], thread)
+        break
 
 
 def enter_raffles(asins: list[str], accounts: list[AmazonAccount], max_workers: int = 5) -> None:
@@ -81,7 +145,8 @@ def enter_raffles(asins: list[str], accounts: list[AmazonAccount], max_workers: 
     if not accounts or not asins:
         return
 
-    max_workers = max(1, min(max_workers, len(accounts)))
+    # Never spawn more workers than accounts.
+    max_workers = max(1, min(int(max_workers), len(accounts)))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(process_account, account, asins) for account in accounts]
@@ -91,7 +156,7 @@ def enter_raffles(asins: list[str], accounts: list[AmazonAccount], max_workers: 
 
 
 def process_account(account: AmazonAccount, asins: list[str]) -> None:
-    """Process a single account: validate session and submit raffle entries.
+    """Process a single account: validate session, normalize ASINs, and submit raffle entries.
 
     Args:
         account: Amazon account object.
@@ -128,11 +193,16 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
     time.sleep(1.5 + random.random() * 2)
 
     for asin in asins:
+        asin_norm = _normalize_asin(asin)
+        if not _is_valid_asin(asin_norm):
+            print(f"({account.email}) · Skipping invalid ASIN: {asin!r}")
+            continue
+
         print(f"({account.email}) · Getting raffle details...")
 
         # Make sure to get the right offer/listing by amazon
         response = session.get(
-            f"https://www.amazon.fr/dp/{asin}?m=A1X6FK5RDHNB96",
+            f"https://www.amazon.fr/dp/{asin_norm}?m=A1X6FK5RDHNB96",
             headers=DEFAULT_HEADERS,
             proxies=proxies,
         )
@@ -143,7 +213,7 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
         soup = BeautifulSoup(response.text, "html.parser")
 
         if not soup.find("input", {"name": "submit.inviteButton"}):
-            print(f"({account.email}) · There is no raffle available for this product or already in ({asin})")
+            print(f"({account.email}) · There is no raffle available for this product or already in ({asin_norm})")
             time.sleep(1.5 + random.random() * 2)
             continue
 
@@ -194,7 +264,7 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
         if response.status_code == 200:
             print(f"({account.email}) · Successfully entered the raffle")
 
-            discord.entries.send_private_webhook_entries(account, product_title, product_image, asin)
+            discord.entries.send_private_webhook_entries(account, product_title, product_image, asin_norm)
         else:
             print(f"({account.email}) · Error while entering raffle")
 
