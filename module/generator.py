@@ -255,7 +255,7 @@ def main(
         if w.isalpha() and 4 <= len(w) <= 10
     ]
 
-    emails = [add_random_tag_to_email(email, FRENCH_WORDS) for email in emails]
+    #emails = [add_random_tag_to_email(email, FRENCH_WORDS) for email in emails]
 
     # Randomize to distribute domains/proxies and reduce repeated patterns.
     random.shuffle(emails)
