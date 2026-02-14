@@ -160,7 +160,7 @@ class AmazonEmailManager:
 
                 # Fetch all unread messages since yesterday.
                 # (We dispatch by reading To: locally instead of server-side TO filtering per target.)
-                status, messages = self.mail.search("UTF-8", f'(UNSEEN SINCE "{since_str}")'.encode("utf-8"))
+                status, messages = self.mail.search("UTF-8", f'(SINCE "{since_str}")'.encode("utf-8"))
                 if status != "OK":
                     time.sleep(1.0)
                     continue
