@@ -40,16 +40,16 @@ def run_cli() -> None:
         match choice:
             case 1:
                 generate_handler()
-                time.sleep(3)
+                time.sleep(1)
             case 2:
                 open_account()
                 time.sleep(1)
             case 3:
                 entry_raffle_manager()
-                time.sleep(3)
+                time.sleep(1)
             case 4:
                 check_raffle_manager()
-                time.sleep(3)
+                time.sleep(1)
             case 5:
                 config_manager()
             case _:
