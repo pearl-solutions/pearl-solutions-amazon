@@ -445,3 +445,53 @@ def generate_account(
                     browser.close()
             except Exception:
                 pass
+
+def enter_account_manual(
+    email: str,
+    password: str,
+    proxy: str,
+) -> Optional[AmazonAccount]:
+    with Camoufox(
+        os="windows",
+        screen=Screen(max_width=1920, max_height=1080),
+        window=(850 + int(random.random() * 10), 700 + int(random.random() * 10)),
+        humanize=True,
+        locale="fr-FR",
+        disable_coop=True,
+        i_know_what_im_doing=True,
+        proxy=proxy_string_to_dict(proxy),
+        geoip=True,
+    ) as browser:
+        try:
+            page = browser.new_page()
+            page.goto("https://www.amazon.fr")
+            page.wait_for_load_state("networkidle")
+
+            input("Press enter to continue...")
+
+            account = AmazonAccount(
+                email=email,
+                password=password,
+                proxy=proxy,
+                cookies=page.context.cookies()
+            )
+
+            account.save_account()
+
+            browser.close()
+
+            return account
+        except Exception:
+            print("Error while creating account")
+            return None
+        finally:
+            try:
+                if page:
+                    page.close()
+            except Exception:
+                pass
+            try:
+                if browser:
+                    browser.close()
+            except Exception:
+                pass

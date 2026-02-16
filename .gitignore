@@ -11,3 +11,4 @@ __pycache__/
 *.png
 .DS_Store
 !requirements.txt
+scripts/
