@@ -49,7 +49,7 @@ def run_cli() -> None:
                 time.sleep(1)
             case 4:
                 check_raffle_manager()
-                time.sleep(1)
+                time.sleep(5)
             case 5:
                 config_manager()
             case _:
