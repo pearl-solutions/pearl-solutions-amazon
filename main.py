@@ -40,7 +40,7 @@ def run_cli() -> None:
         match choice:
             case 1:
                 generate_handler()
-                time.sleep(1)
+                time.sleep(5)
             case 2:
                 open_account()
                 time.sleep(1)

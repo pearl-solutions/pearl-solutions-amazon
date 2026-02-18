@@ -7,6 +7,7 @@ from typing import Any
 DEFAULT_CONFIG: dict[str, Any] = {
     "webhook": "",
     "sms_pool": "",
+    "hero_sms": "",
     "imap": {
         "email": "",
         "password": "",

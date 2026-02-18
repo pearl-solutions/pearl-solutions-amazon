@@ -8,7 +8,7 @@ import requests
 from wordfreq import top_n_list
 from amazon.amazonAccount import generate_account, load_all_accounts
 from amazon.amazonImap import AmazonEmailManager
-from amazon.amazonSms import AmazonSmsManagerPool
+from amazon.amazonSms import AmazonSmsManagerPool, AmazonSmsManagerHero
 from discord.gen import send_private_webhook_gen
 from utils.config import load_config
 from utils.title import print_title
@@ -81,7 +81,10 @@ def generate_handler() -> None:
         email_address=config["imap"]["email"],
         password=config["imap"]["password"],
     )
-    sms_manager = AmazonSmsManagerPool(config["sms_pool"])
+    if config["hero_sms"] is not "" :
+        sms_manager = AmazonSmsManagerHero(config["hero_sms"])
+    else:
+        sms_manager = AmazonSmsManagerPool(config["sms_pool"])
 
     main(emails, password, proxies, amount, thread_count, imap_manager, sms_manager)
 
