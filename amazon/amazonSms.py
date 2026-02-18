@@ -149,7 +149,7 @@ class AmazonSmsManagerHero:
             'service': 'am',
             'country': '16',
             'maxPrice': '0.1005',
-            'fixedPrice': 'true',
+            #'fixedPrice': 'true',
             'api_key': self.api_key
         }
 
