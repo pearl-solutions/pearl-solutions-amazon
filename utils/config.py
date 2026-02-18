@@ -56,7 +56,7 @@ def load_config(path: str = "config.json") -> dict[str, Any]:
     missing = [
         key
         for key, value in config.items()
-        if (not value) and key != "amazon_asins"
+        if (not value) and key != "amazon_asins" and key != "hero_sms"
     ]
     if missing:
         print("[!] The following required fields are missing in config.json:")
