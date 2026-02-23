@@ -169,13 +169,13 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
         print(f"({account.email}) · Getting session...")
 
         response = session.get(
-            "https://amazon.fr/",
+            "https://www.amazon.fr/",
             headers=DEFAULT_HEADERS,
             proxies=proxies,
             timeout=7,
         )
         if response.status_code != 200:
-            print(f"({account.email}) · Error while getting session")
+            print(f"({account.email}) · Error while getting session ({response.status_code})")
             return
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -184,6 +184,8 @@ def process_account(account: AmazonAccount, asins: list[str]) -> None:
         # Avoid `tag.text` access when tag is None.
         if not tag or ("vous" in tag.text):
             print(f"({account.email}) · Error while getting session")
+            with open("error.html", "a") as f:
+                f.write(response.text)
             return
 
     except Exception as e:

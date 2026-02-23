@@ -9,6 +9,7 @@ from http.cookiejar import Cookie
 from pathlib import Path
 from typing import Any, Optional, TypedDict
 
+import cloudscraper
 import requests
 from browserforge.fingerprints import Screen
 from camoufox.sync_api import Camoufox
@@ -206,7 +207,10 @@ class AmazonAccount:
         for c in self.cookies:
             jar.set_cookie(dict_to_cookie(c))
 
-        return session
+        scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False},
+                                              sess=session)
+
+        return scraper
 
     def get_email(self) -> str:
         return self.email
@@ -372,7 +376,7 @@ def generate_account(
                 if not number:
                     break
 
-                page.type("#cvfPhoneNumber", number, delay=120)
+                page.type("#cvfPhoneNumber", number, delay=240)
                 time.sleep(random.random())
 
                 page.wait_for_selector("#a-autoid-0")

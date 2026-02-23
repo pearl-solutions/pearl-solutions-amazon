@@ -35,7 +35,7 @@ class AmazonSmsManagerPool:
             "country": (None, "GB"),
             "service": (None, "39"),
             "pool": (None, ""),
-            "max_price": (None, "0.20"),
+            "max_price": (None, "0.3"),
             "pricing_option": (None, ""),
             "quantity": (None, "1"),
             "areacode": (None, ""),

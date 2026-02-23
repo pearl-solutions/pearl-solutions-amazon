@@ -9,3 +9,4 @@ camoufox
 faker
 browserforge
 wordfreq
+cloudscraper

@@ -251,7 +251,7 @@ class AmazonEmailManager:
         self,
         target_email: str,
         timeout: int = 120,
-        check_interval: int = 3,
+        check_interval: int = 5,
         thread_id: str = "",
     ) -> Optional[str]:
         """Poll the inbox until an OTP is received or the timeout is reached.
